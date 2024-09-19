@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathAI - Math Solver with Step-by-Step Solutions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .result, .steps {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+            text-align: left;
+            margin-left: 10%;
+        }
+
+        .steps {
+            font-size: 16px;
+            color: #555;
+        }
+    </style>
+    <!-- Math.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.2/math.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>MathAI - by Chandan katiyar</h1>
+        <p>Enter a math expression, and MathAI will solve it step by step!</p>
+
+        <input type="text" id="mathInput" placeholder="e.g., 2 + 3 * 4">
+        <br>
+        <button onclick="solveMath()">Solve</button>
+
+        <div class="result" id="result"></div>
+        <div class="steps" id="steps"></div>
+    </div>
+
+    <script>
+        // Function to evaluate math expression and show step-by-step solutions
+        function solveMath() {
+            const mathInput = document.getElementById('mathInput').value;
+            const stepsDiv = document.getElementById('steps');
+            stepsDiv.innerHTML = "";  // Clear previous steps
+            try {
+                // Break down expression for step-by-step
+                let parsedSteps = getSteps(mathInput);
+                
+                // Display each step
+                parsedSteps.forEach((step, index) => {
+                    stepsDiv.innerHTML += `Step ${index + 1}: ${step}<br>`;
+                });
+
+                // Use Math.js to evaluate the final expression
+                const result = math.evaluate(mathInput);
+                document.getElementById('result').innerText = "Final Result: " + result;
+            } catch (error) {
+                document.getElementById('result').innerText = "Error: Invalid expression";
+            }
+        }
+
+        // Function to provide step-by-step breakdown of an expression
+        function getSteps(expression) {
+            const steps = [];
+            let simplified = expression;
+
+            // Check for parentheses (simplify inside-out)
+            while (simplified.includes('(')) {
+                let nextStep = math.simplify(simplified);
+                steps.push(`Simplify parentheses: ${nextStep.toString()}`);
+                simplified = nextStep.toString();
+            }
+
+            // Handle multiplication and division first
+            let mulDivStep = simplified.replace(/([0-9]+)([*\/])([0-9]+)/g, (match, p1, op, p2) => {
+                let partialResult = math.evaluate(match);
+                steps.push(`${p1} ${op} ${p2} = ${partialResult}`);
+                return partialResult;
+            });
+
+            // Handle addition and subtraction next
+            let addSubStep = mulDivStep.replace(/([0-9]+)([+-])([0-9]+)/g, (match, p1, op, p2) => {
+                let partialResult = math.evaluate(match);
+                steps.push(`${p1} ${op} ${p2} = ${partialResult}`);
+                return partialResult;
+            });
+
+            steps.push(`Final Simplified Expression: ${addSubStep}`);
+            return steps;
+        }
+    </script>
+
+</body>
+</html>
